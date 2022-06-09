@@ -1,11 +1,15 @@
+using System;
+using Game.Scripts.Core;
 using Spine.Unity;
+using Spine.Unity.Modules;
 using UnityEngine;
 
 namespace Game.Scripts.Mobs.Miner
 {
-    public class MinerMob : MonoBehaviour, IDamageable
+    public class MinerMob : MonoBehaviour, IDamageable, ISelectable
     {
         [SerializeField] private SkeletonAnimation animation;
+        [SerializeField] private SkeletonGhost ghost;
         [SerializeField] private CollisionBodyPartDetection chest;
         [SerializeField] private MinerClass.MinerTypeDamage minerType;
         
@@ -13,7 +17,7 @@ namespace Game.Scripts.Mobs.Miner
         
         private void Awake()
         {
-            thisMob = new MinerClass(animation, minerType);
+            thisMob = new MinerClass(animation, ghost,minerType);
             chest.Collision += OnCollisionDetected;
         }
         
@@ -22,7 +26,7 @@ namespace Game.Scripts.Mobs.Miner
             if (thisMob.isDoingDamage) return;
             WasDamagedBy(damageable.GetDamage());
         }
-        
+
         public float GetDamage()
         {
             return (int) minerType;  // разный дамаг в зависимости от типа шахтера
@@ -37,6 +41,16 @@ namespace Game.Scripts.Mobs.Miner
         {
             thisMob.CurrentState = Mob.State.Damaged;
             thisMob.ChangeHp(-damage);
+        }
+
+        public void Select()
+        {
+            thisMob.Select();
+        }
+
+        public void Deselect()
+        {
+            thisMob.Deselect();
         }
     }
 }

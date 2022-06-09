@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Spine.Unity;
+using Spine.Unity.Modules;
 using UnityEngine;
 
 namespace Game.Scripts.Mobs.Miner
@@ -27,13 +28,16 @@ namespace Game.Scripts.Mobs.Miner
             Normal = 1,
             Elite = 2
         }
+
+        private readonly SkeletonGhost skeletonGhost;
         
-        public MinerClass(SkeletonAnimation skeletonAnimation, MinerTypeDamage minerType) : base(skeletonAnimation)
+        public MinerClass(SkeletonAnimation skeletonAnimation, SkeletonGhost skeletonGhost, MinerTypeDamage minerType) : base(skeletonAnimation)
         {
-            Hp = (int) minerType * 2;
+            Hp = (int) minerType;
+            this.skeletonGhost = skeletonGhost;
         }
 
-        protected override void OnStateChanged(State newState)
+        protected override void OnStateChanged(State newState) 
         {
             base.OnStateChanged(newState);
             isDoingDamage = false;
@@ -58,6 +62,18 @@ namespace Game.Scripts.Mobs.Miner
             
         }
 
+        public override void Select()
+        {
+            base.Select();
+            skeletonGhost.ghostingEnabled = true;
+        }
+
+        public override void Deselect()
+        {
+            base.Deselect();
+            skeletonGhost.ghostingEnabled = false;
+        }
+        
         private Anim SelectRandomHit()
         {
             int randomIndex = Random.Range(0, 2);

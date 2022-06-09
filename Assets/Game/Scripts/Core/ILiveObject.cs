@@ -1,4 +1,4 @@
-namespace Game.Scripts.Mobs
+namespace Game.Scripts.Core
 {
     public interface ILiveObject
     {

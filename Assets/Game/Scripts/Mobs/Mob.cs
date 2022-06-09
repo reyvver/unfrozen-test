@@ -1,3 +1,4 @@
+using Game.Scripts.Core;
 using Spine;
 using Spine.Unity;
 using Spine.Unity.Modules.AttachmentTools;
@@ -16,10 +17,8 @@ namespace Game.Scripts.Mobs
         private State currentState;
         public State CurrentState
         {
-            get => currentState;
             set => OnStateChanged(value);
         }
-
         public float Hp { get; set; }
         public bool isDoingDamage;
         
@@ -31,7 +30,6 @@ namespace Game.Scripts.Mobs
             this.skeletonAnimation = skeletonAnimation;
             this.skeletonAnimation.Initialize(false);
             this.skeletonAnimation.state.Complete += AnimationCompleted;
-            
             CurrentState = State.Idle;
         }
 
@@ -56,12 +54,12 @@ namespace Game.Scripts.Mobs
         {
             if (bloodSkin == null)
             {
-                bloodSkin = skeletonAnimation.skeleton.data.FindSkin("blood");
+                bloodSkin = skeletonAnimation.skeleton.Data.FindSkin("blood");
                 if (bloodSkin == null)
                     return;
             }
 
-            var newSkin = skeletonAnimation.skeleton.skin;
+            var newSkin = skeletonAnimation.skeleton.Skin;
             newSkin.AddAttachments(bloodSkin);
             skeletonAnimation.skeleton.SetSkin(newSkin);
             RefreshSkeletonAttachments();
@@ -75,6 +73,14 @@ namespace Game.Scripts.Mobs
         public void ChangeHp(float value)
         {
             Hp += value;
+        }
+        
+        public virtual void Select()
+        {
+        }
+
+        public virtual void Deselect()
+        {
         }
     }
 }
