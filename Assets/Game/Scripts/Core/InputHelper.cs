@@ -1,11 +1,12 @@
 using System;
+using Game.Scripts.Core.Gameplay;
 using UnityEngine;
 
 namespace Game.Scripts.Core
 {
     public static class InputHelper
     {
-        public static bool IsClicked(out ISelectable clickedGameObject)
+        public static bool IsMobClicked(out Mob clickedGameObject)
         {
             if (!Input.GetMouseButtonDown(0))
             {
@@ -19,9 +20,9 @@ namespace Game.Scripts.Core
 
             if (hit2D.collider != null)
             {
-                if (hit2D.transform.TryGetComponent(out ISelectable liveObject))
+                if (hit2D.transform.TryGetComponent(out Mob mob))
                 {
-                    clickedGameObject = liveObject;
+                    clickedGameObject = mob;
                     return true;
                 }
             } 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Scripts.Mobs.Miner
 {
-    public class MinerClass : Mob
+    public class MinerClass : MobClass
     {
         private enum Anim
         {
@@ -14,7 +14,7 @@ namespace Game.Scripts.Mobs.Miner
             Idle,
             Damaged
         }
-
+        
         private readonly Dictionary<Anim, string> animNames = new Dictionary<Anim, string>
         {
             {Anim.Idle, "Idle"},
@@ -22,13 +22,13 @@ namespace Game.Scripts.Mobs.Miner
             {Anim.Hit1, "Miner_1"},
             {Anim.Hit2, "PickaxeCharge"},
         };
-
+        
         public enum MinerTypeDamage
         {
             Normal = 1,
             Elite = 2
         }
-
+        
         private readonly SkeletonGhost skeletonGhost;
         
         public MinerClass(SkeletonAnimation skeletonAnimation, SkeletonGhost skeletonGhost, MinerTypeDamage minerType) : base(skeletonAnimation)
@@ -36,12 +36,12 @@ namespace Game.Scripts.Mobs.Miner
             Hp = (int) minerType;
             this.skeletonGhost = skeletonGhost;
         }
-
+        
         protected override void OnStateChanged(State newState) 
         {
             base.OnStateChanged(newState);
             isDoingDamage = false;
-
+        
             switch (newState)
             {
                 case State.Idle:
@@ -61,13 +61,13 @@ namespace Game.Scripts.Mobs.Miner
             }
             
         }
-
+        
         public override void Select()
         {
             base.Select();
             skeletonGhost.ghostingEnabled = true;
         }
-
+        
         public override void Deselect()
         {
             base.Deselect();
@@ -79,7 +79,7 @@ namespace Game.Scripts.Mobs.Miner
             int randomIndex = Random.Range(0, 2);
             return (Anim) randomIndex;
         }
-
+        
         private string GetAnimName(Anim anim)
         {
             return animNames[anim];

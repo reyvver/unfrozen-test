@@ -1,4 +1,5 @@
 using Game.Scripts.Core;
+using Game.Scripts.Core.Gameplay;
 using UnityEngine;
 
 namespace Game.Scripts.Game
@@ -7,9 +8,9 @@ namespace Game.Scripts.Game
     {
         private void Update()
         {
-            if (InputHelper.IsClicked(out ISelectable gameObject))
+            if (InputHelper.IsMobClicked(out Mob mob))
             {
-                gameObject.Select();
+                mob.Select();
             }
         }
     }

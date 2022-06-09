@@ -14,7 +14,7 @@ TagManager:
   - UI
   - SquadLeft
   - SquadRight
-  - 
+  - Mob
   - 
   - 
   - 
@@ -44,4 +44,7 @@ TagManager:
     locked: 0
   - name: LiveObjects
     uniqueID: 522013741
+    locked: 0
+  - name: SelectedLiveObjects
+    uniqueID: 2548773639
     locked: 0

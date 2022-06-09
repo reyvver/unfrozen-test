@@ -1,4 +1,4 @@
-namespace Game.Scripts.Core
+namespace Game.Scripts.Core.Gameplay
 {
     public interface ILiveObject
     {

@@ -1,5 +1,5 @@
 using System;
-using Game.Scripts.Core;
+using Game.Scripts.Core.Gameplay;
 using UnityEngine;
 
 namespace Game.Scripts.Mobs
