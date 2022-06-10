@@ -1,26 +1,25 @@
-using Game.Scripts.Core.Gameplay;
+using System;
+using Game.Scripts.Core.Model;
 using Spine;
 using Spine.Unity;
 using Spine.Unity.Modules.AttachmentTools;
+using UnityEngine;
+using State = Game.Scripts.Core.Model.IMobClass.State;
 
 namespace Game.Scripts.Mobs
 {
-    public class MobClass : ISelectable, ILiveObject
+    public class MobClass : IMobClass
     {
-        public enum State
-        {
-            Idle,
-            Damaged,
-            DoDamage
-        }
-        
         private State currentState;
+        public event Action StateChanged;
+
         public State CurrentState
         {
             set => OnStateChanged(value);
         }
-        public float Hp { get; set; }
-        public bool isDoingDamage;
+
+        public bool IsDoingDamage { get; protected set; }
+        public float Hp { get; protected set; }
         
         private readonly SkeletonAnimation skeletonAnimation;
         private Skin bloodSkin;
@@ -36,7 +35,10 @@ namespace Game.Scripts.Mobs
         private void AnimationCompleted(TrackEntry entry)
         {
             if (currentState != State.Idle)
+            {
                 CurrentState = State.Idle;
+                StateChanged?.Invoke();
+            }
         }
         
         protected virtual void OnStateChanged(State newState)
@@ -81,6 +83,16 @@ namespace Game.Scripts.Mobs
         
         public virtual void Deselect()
         {
+        }
+        
+        public void HideOrShow(bool shown)
+        {
+            skeletonAnimation.gameObject.SetActive(shown);
+        }
+        
+        public void ChangeLayer(int i)
+        {
+           skeletonAnimation.transform.GetComponent<MeshRenderer>().sortingOrder = i;
         }
     }
 }

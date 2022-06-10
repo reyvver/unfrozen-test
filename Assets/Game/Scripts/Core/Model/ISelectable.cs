@@ -1,4 +1,4 @@
-namespace Game.Scripts.Core.Gameplay
+namespace Game.Scripts.Core.Model
 {
     public interface ISelectable
     {

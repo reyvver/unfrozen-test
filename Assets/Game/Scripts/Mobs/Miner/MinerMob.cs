@@ -1,4 +1,4 @@
-using Game.Scripts.Core.Gameplay;
+using Game.Scripts.Core.Model;
 using Spine.Unity;
 using Spine.Unity.Modules;
 using UnityEngine;
@@ -17,39 +17,34 @@ namespace Game.Scripts.Mobs.Miner
         private void Awake()
         {
             thisMob = new MinerClass(animation, ghost, minerType);
+            SetMobClass(thisMob);
             chest.Collision += OnCollisionDetected;
         }
-
-        public override void Select()
-        {
-            thisMob.Select();
-        }
-
-        public override void Deselect()
-        {
-            thisMob.Deselect();
-        }
-
+        
         public override float GetDamage()
         {
             return (int) minerType;
         }
 
-        public override void DoDamage()
+        public override void PrepareForFight()
         {
-            thisMob.CurrentState = MobClass.State.DoDamage;
+            base.PrepareForFight();
+            thisMob.ChangeLayer(250);
         }
 
-        public override void WasDamagedBy(float damage)
+        protected override void AfterFight()
         {
-            thisMob.CurrentState = MobClass.State.Damaged;
-            thisMob.ChangeHp(-damage);
+            base.AfterFight();
+            thisMob.ChangeLayer(orderInLayer);
+            
+            if (!Alive)
+                thisMob.HideOrShow(false);
         }
-        
+
         private void OnCollisionDetected(IDamageable damageable)
         {
-            if (thisMob.isDoingDamage) return;
-            WasDamagedBy(damageable.GetDamage());
+            if (thisMob.IsDoingDamage) return;
+            WasAttacked(damageable.GetDamage());
         }
     }
 }

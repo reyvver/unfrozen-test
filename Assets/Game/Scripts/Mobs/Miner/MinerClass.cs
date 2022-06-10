@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Spine.Unity;
 using Spine.Unity.Modules;
 using UnityEngine;
+using State = Game.Scripts.Core.Model.IMobClass.State;
 
 namespace Game.Scripts.Mobs.Miner
 {
@@ -40,7 +41,7 @@ namespace Game.Scripts.Mobs.Miner
         protected override void OnStateChanged(State newState) 
         {
             base.OnStateChanged(newState);
-            isDoingDamage = false;
+            IsDoingDamage = false;
         
             switch (newState)
             {
@@ -54,7 +55,7 @@ namespace Game.Scripts.Mobs.Miner
                     break;
                 
                 case State.DoDamage:
-                    isDoingDamage = true;
+                    IsDoingDamage = true;
                     Anim anim = SelectRandomHit();
                     SetAnimation(0, GetAnimName(anim), false);
                     break;
@@ -66,12 +67,14 @@ namespace Game.Scripts.Mobs.Miner
         {
             base.Select();
             skeletonGhost.ghostingEnabled = true;
+            ChangeLayer(300);
         }
         
         public override void Deselect()
         {
             base.Deselect();
             skeletonGhost.ghostingEnabled = false;
+            ChangeLayer(0);
         }
         
         private Anim SelectRandomHit()
