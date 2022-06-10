@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Game.Scripts.Core;
-using Game.Scripts.Core.Model;
 using Game.Scripts.Game.UI;
 using UnityEngine;
 
@@ -9,21 +5,8 @@ namespace Game.Scripts.Game
 {
     public class GameplayManager : MonoBehaviour
     {
-        [SerializeField] private Transform FightPosLeft;
-        [SerializeField] private Transform FighTPosRight;
-
         [SerializeField] private UIManager ui;
-        
-        [SerializeField] private GameObject mobPrefab;
-        [SerializeField] private List<Transform> playerSquad;
-        [SerializeField] private List<Transform> enemySquad;
-        
-        private readonly MobsManager mobsManager = new MobsManager();
-        private Coroutine waiter;
-        private bool playerTurn;
-        private bool chooseToFight;
-        private Mob currentMobTurn;
-        private Mob attackedMob;
+        [SerializeField] private BattleManager battle;
 
         public enum GameState
         {
@@ -31,136 +14,82 @@ namespace Game.Scripts.Game
             EnemyTurn,
             GameWin,
             GameLose,
-            ChooseOption,
             ChooseEnemy
         }
 
-        public GameState State
+        private GameState State
         {
             set => UpdateState(value);
         }
 
         private void Awake()
         {
-           mobsManager.SpawnMobs(playerSquad, Mob.MobOwner.Player, mobPrefab);
-           mobsManager.SpawnMobs(enemySquad, Mob.MobOwner.Enemy, mobPrefab);
-           mobsManager.SetMobsQueue();
+            battle.Init();
+            battle.DoFade += HideFade;
+            battle.GameFinished += OnGameFinished;
+            battle.FightStatus += OnFightStatusChanged;
 
-           ui.panelFight.Fight += PlayerChoice;
-           ChangeTurn();
+            ui.Init();
+            ui.PanelRestart.Restart += RestartGame;
+            ui.PanelFight.Fight += OnPlayerChoice;
+
+            StartGame();
         }
 
-        private void ChangeTurn()
+        private void StartGame()
         {
-            if (CheckGameEnd())
-            {
-                return;
-            }
-            
-            if (waiter != null)
-                StopCoroutine(waiter);
-            
-            currentMobTurn = mobsManager.GetMob(out playerTurn);
-            currentMobTurn.ShowSelection(true);
-            chooseToFight = false;
-            ui.panelFight.ShowPanel(playerTurn);
-            UpdateState(playerTurn ? GameState.PlayerTurn : GameState.EnemyTurn);
-            if (!playerTurn) OnEnemyTurn();
+            battle.SetBattleQueue();
+            HandleChangeTurn();
         }
 
-        private void OnEnemyTurn()
-        {
-            attackedMob = mobsManager.GetRandomMob(Mob.MobOwner.Player);
-            ManageAttack(attackedMob);
-        }
-
-        private void Update()
-        {
-            if (!playerTurn ) return;
-
-            if (InputHelper.IsMobClicked(out Mob clickedMob))
-            {
-                if (chooseToFight)
-                {
-                    if (clickedMob.Owner == Mob.MobOwner.Enemy && clickedMob.Alive)
-                    {
-                        attackedMob = clickedMob;
-                        ManageAttack(attackedMob);
-                    }
-                }
-                else 
-                    UpdateState(GameState.ChooseOption);
-            }
-        }
-
-        private void ManageAttack(Mob attacked)
-        {
-            ui.DoBlackoutFade(true);
-            
-            currentMobTurn.PrepareForFight();
-            currentMobTurn.MoveX(currentMobTurn.Owner == Mob.MobOwner.Player? FightPosLeft.position.x : FighTPosRight.position.x, StartAttack);
-            
-            attacked.PrepareForFight();
-            attacked.MoveX(attacked.Owner == Mob.MobOwner.Player? FightPosLeft.position.x : FighTPosRight.position.x);
-        }
-
-        private void StartAttack()
-        {
-            currentMobTurn.DoAttack();
-            waiter = StartCoroutine(WaitForFighters());
-        }
-
-
-        IEnumerator WaitForFighters()
-        {
-            yield return new WaitUntil(() => currentMobTurn.ActionIsFinished && attackedMob.ActionIsFinished);
-
-            if (attackedMob.Alive)
-            {
-                mobsManager.ReturnMob(attackedMob);
-            }
-            else mobsManager.RemoveDeadMobFromQueue();
-            
-            ui.DoBlackoutFade(false);
-            mobsManager.ReturnMob(currentMobTurn);
-            currentMobTurn.MoveX(currentMobTurn.StartPosX);
-            attackedMob.MoveX(attackedMob.StartPosX, ChangeTurn);
-        }
-
-        private bool CheckGameEnd()
-        {
-            if (playerTurn && !mobsManager.HasEnemyMobs())
-            {
-                UpdateState(GameState.GameWin);
-                return true;
-            }
-
-            if (!playerTurn && !mobsManager.HasPlayerMobs())
-            {
-                UpdateState(GameState.GameLose);
-                return true;
-            }
-
-            return false;
-        }
-        
         private void UpdateState(GameState value)
         {
-           ui.SetText(value);
+            ui.SetText(value);
+            ui.DoFightPanelFade(battle.PlayerTurn);
         }
 
-        private void PlayerChoice(bool value)
+        private void OnPlayerChoice(bool isFight)
         {
-            chooseToFight = value;
-            if (!chooseToFight) Skip();
-                else UpdateState(GameState.ChooseEnemy);
+            if (isFight) UpdateState(GameState.ChooseEnemy);
+            battle.OnPlayerTurn(isFight);
         }
 
-        private void Skip()
+        private void OnGameFinished(bool result)
         {
-            mobsManager.ReturnMob(currentMobTurn);
-            currentMobTurn.ShowSelection(false);
-            ChangeTurn();
+            State = result ? GameState.GameWin : GameState.GameLose;
+            ui.PanelRestart.ShowPanel(true);
+            ui.PanelFight.ShowPanel(false);
+        }
+
+        private void OnFightStatusChanged(bool status)
+        {
+            if (status) HandleChangeTurn();
+            else
+            {
+                ui.DoFightPanelFade(false);
+                ui.DoBlackoutFade(true);
+            }
+        }
+
+        private void HideFade()
+        {
+            ui.DoBlackoutFade(false);
+        }
+
+        private void HandleChangeTurn()
+        {
+            if (!battle.BattleFinished)
+            {
+                battle.ChangeTurn();
+                State = battle.PlayerTurn ? GameState.PlayerTurn : GameState.EnemyTurn;
+            }
+        }
+
+        private void RestartGame()
+        {
+            ui.PanelRestart.ShowPanel(false);
+            battle.ResetBattle();
+            HandleChangeTurn();
         }
     }
 }

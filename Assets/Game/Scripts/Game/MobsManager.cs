@@ -9,16 +9,18 @@ namespace Game.Scripts.Game
     {
         private readonly Dictionary<Mob.MobOwner, List<Mob>> mobs = new Dictionary<Mob.MobOwner, List<Mob>>();
         private Queue<Mob> mobsQueue = new Queue<Mob>();
+        private int orderInLayer = 0;
 
-        public void SpawnMobs(List<Transform> places, Mob.MobOwner owner, GameObject prefab)
+
+        public void SpawnMobs(List<Transform> places, Mob.MobOwner owner, Mob.MobType mobType, GameObject prefab)
         {
-            mobs.Add(owner, new List<Mob>());
-            int orderInLayer = 0;
+            if (!mobs.ContainsKey(owner))
+                mobs.Add(owner, new List<Mob>());
             
             foreach (var place in places)
             {
                 var mob = CreateNewMob(prefab, place, owner);
-                mob.Init(owner, orderInLayer);
+                mob.Init(owner, orderInLayer, mobType);
                 mobs[owner].Add(mob);
                 orderInLayer++;
             }
@@ -33,31 +35,17 @@ namespace Game.Scripts.Game
 
         public void SetMobsQueue()
         {
+            mobsQueue.Clear();
+
             var allMobs = mobs[Mob.MobOwner.Player].ToList();
             allMobs.AddRange(mobs[Mob.MobOwner.Enemy]);
             
-            List<int> indexChecked = new List<int>();
-            int previousMob = -1;
-            
-            for (int i = 0; i < allMobs.Count; i++)
+            var rnd = new System.Random();
+            var randomized = allMobs.OrderBy(item => rnd.Next());
+
+            foreach (var mob in randomized)
             {
-                while (true)
-                {
-                    int random = Random.Range(0, allMobs.Count);
-            
-                    if (random != previousMob)
-                    {
-                        previousMob = random;
-            
-                        if (!indexChecked.Contains(random))
-                        {
-                            indexChecked.Add(random);
-                            mobsQueue.Enqueue(allMobs[random]);
-                        }
-                        
-                        break;
-                    }
-                }
+                mobsQueue.Enqueue(mob);
             }
         }
 
@@ -92,6 +80,16 @@ namespace Game.Scripts.Game
         {
             mobsQueue = new Queue<Mob>(mobsQueue.Where(m => m.Alive));
         }
-     
+
+        public void ResetAll()
+        {
+            foreach (var mobList in mobs.Values)
+            {
+                foreach (var mob in mobList)
+                {
+                    mob.ResetMob();
+                }
+            }
+        }
     }
 }

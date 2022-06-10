@@ -8,14 +8,23 @@ namespace Game.Scripts.Game.UI
     {
         [SerializeField] private Text turnIndicator;
         [SerializeField] private Image blackout;
-        public PlayerFightPanelUI panelFight;
+        [SerializeField] private PanelRestart panelRestart;
+        [SerializeField] private PlayerFightPanelUI panelFight;
 
+        public PlayerFightPanelUI PanelFight => panelFight;
+        public PanelRestart PanelRestart => panelRestart;
+
+        public void Init()
+        {
+            panelFight.Init();
+        }
+        
         public void SetText(GameplayManager.GameState state)
         {
             switch (state)
             {
                 case GameplayManager.GameState.PlayerTurn:
-                    turnIndicator.text = "Player turn"; 
+                    turnIndicator.text = "Player turn: Choose fight or skip"; 
                     break;
                 
                 case GameplayManager.GameState.EnemyTurn:
@@ -29,20 +38,22 @@ namespace Game.Scripts.Game.UI
                 case GameplayManager.GameState.GameWin:
                     turnIndicator.text = "Game win"; 
                     break;
-                
-                case GameplayManager.GameState.ChooseOption:
-                    turnIndicator.text = "Choose fight or skip"; 
-                    break;
-                
+
                 case GameplayManager.GameState.ChooseEnemy:
                     turnIndicator.text = "Click on enemy"; 
                     break;
             }
         }
 
-        public void DoBlackoutFade(bool fadeIn)
+        public void DoBlackoutFade(bool shown)
         {
-            blackout.DOFade(fadeIn ? 0.6f : 0, 1f);
+            blackout.DOFade(shown ? 0.6f : 0, 1f);
         }
+
+        public void DoFightPanelFade(bool shown)
+        {
+            panelFight.ShowPanel(shown);
+        }
+        
     }
 }

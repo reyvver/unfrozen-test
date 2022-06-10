@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Scripts.Core.Model;
 using Spine.Unity;
 using Spine.Unity.Modules;
 using UnityEngine;
@@ -24,15 +25,9 @@ namespace Game.Scripts.Mobs.Miner
             {Anim.Hit2, "PickaxeCharge"},
         };
         
-        public enum MinerTypeDamage
-        {
-            Normal = 1,
-            Elite = 2
-        }
-        
         private readonly SkeletonGhost skeletonGhost;
         
-        public MinerClass(SkeletonAnimation skeletonAnimation, SkeletonGhost skeletonGhost, MinerTypeDamage minerType) : base(skeletonAnimation)
+        public MinerClass(SkeletonAnimation skeletonAnimation, int orderInLayer, SkeletonGhost skeletonGhost, Mob.MobType minerType) : base(skeletonAnimation, orderInLayer)
         {
             Hp = (int) minerType;
             this.skeletonGhost = skeletonGhost;
@@ -67,14 +62,12 @@ namespace Game.Scripts.Mobs.Miner
         {
             base.Select();
             skeletonGhost.ghostingEnabled = true;
-            ChangeLayer(300);
         }
         
         public override void Deselect()
         {
             base.Deselect();
             skeletonGhost.ghostingEnabled = false;
-            ChangeLayer(0);
         }
         
         private Anim SelectRandomHit()

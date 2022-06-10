@@ -271,8 +271,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 2ee5cb992aa134777bec4d5de0275061, type: 2}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -292,7 +291,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 522013741
   m_SortingLayer: 1
-  m_SortingOrder: 100
+  m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &730877666671256409
 MonoBehaviour:
@@ -307,7 +306,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skeletonDataAsset: {fileID: 11400000, guid: cad3094b2a62f49288dc692eae01de9f, type: 2}
-  initialSkinName: base
+  initialSkinName: 
   initialFlipX: 0
   initialFlipY: 0
   separatorSlotNames: []
@@ -406,7 +405,6 @@ MonoBehaviour:
   animation: {fileID: 730877666671256409}
   ghost: {fileID: 107405217}
   chest: {fileID: 1952845148}
-  minerType: 1
 --- !u!61 &120260806545994707
 BoxCollider2D:
   m_ObjectHideFlags: 0

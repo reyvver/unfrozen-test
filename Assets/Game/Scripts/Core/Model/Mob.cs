@@ -10,21 +10,29 @@ namespace Game.Scripts.Core.Model
             Player,
             Enemy
         }
+
+        public enum MobType
+        {
+            MinerRegular = 1,
+            MinerElite = 2
+        }
+        
         public MobOwner Owner { get; private set; }
         public bool Alive { get; private set; }
         public bool ActionIsFinished { get; private set; }
         public float StartPosX { get; private set; }
-
+        protected MobType MobClass { get; private set; }
+        
         private bool isOnFight;
+        private bool damageTaken;
         private IMobClass mobClass;
-        protected int orderInLayer;
 
-        public void Init(MobOwner mobOwner, int order)
+        public virtual void Init(MobOwner mobOwner, int order, MobType mobType)
         {
             Alive = true;
             Owner = mobOwner;
             StartPosX = transform.position.x;
-            orderInLayer = order;
+            MobClass = mobType;
             UpdateChildren();
         }
 
@@ -50,7 +58,8 @@ namespace Game.Scripts.Core.Model
 
         public void WasAttacked(float damage)
         {
-            if (mobClass == null || !isOnFight) return;
+            if (mobClass == null || !isOnFight || damageTaken) return;
+            damageTaken = true;
             mobClass.CurrentState = IMobClass.State.Damaged;
             mobClass.ChangeHp(-damage);
         }
@@ -63,14 +72,14 @@ namespace Game.Scripts.Core.Model
 
         public void ShowSelection(bool value)
         {
-            if (value)
-                mobClass.Select();
+            if (value) mobClass.Select();
             else mobClass.Deselect();
         }
         
         public virtual void PrepareForFight()
         {
             isOnFight = true;
+            damageTaken = false;
             ActionIsFinished = false;
             mobClass.Deselect();
         }
@@ -85,7 +94,12 @@ namespace Game.Scripts.Core.Model
                 Alive = false;
             }
         }
-        
+
+        public virtual void ResetMob()
+        {
+            Alive = true;
+        }
+
         public void MoveX(float newPosX, TweenCallback action = null)
         {
             transform.DOMoveX(newPosX, 1f).OnComplete(action);

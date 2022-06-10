@@ -14,5 +14,6 @@ namespace Game.Scripts.Core.Model
         }
         
         public State CurrentState { set; }
+        public void RestoreHp(int startHp);
     }
 }

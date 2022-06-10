@@ -22,14 +22,17 @@ namespace Game.Scripts.Mobs
         public float Hp { get; protected set; }
         
         private readonly SkeletonAnimation skeletonAnimation;
+        private MeshRenderer meshRenderer;
         private Skin bloodSkin;
         
-        protected MobClass(SkeletonAnimation skeletonAnimation)
+        protected MobClass(SkeletonAnimation skeletonAnimation, int orderInLayer)
         {
             this.skeletonAnimation = skeletonAnimation;
             this.skeletonAnimation.Initialize(false);
             this.skeletonAnimation.state.Complete += AnimationCompleted;
+            meshRenderer = skeletonAnimation.transform.GetComponent<MeshRenderer>();
             CurrentState = State.Idle;
+            meshRenderer.sortingOrder = orderInLayer;
         }
         
         private void AnimationCompleted(TrackEntry entry)
@@ -62,7 +65,7 @@ namespace Game.Scripts.Mobs
             }
         
             var newSkin = skeletonAnimation.skeleton.Skin;
-            newSkin.AddAttachments(bloodSkin);
+            newSkin.Append(bloodSkin);
             skeletonAnimation.skeleton.SetSkin(newSkin);
             RefreshSkeletonAttachments();
         }
@@ -70,6 +73,7 @@ namespace Game.Scripts.Mobs
         private void RefreshSkeletonAttachments () {
             skeletonAnimation.Skeleton.SetSlotsToSetupPose();
             skeletonAnimation.AnimationState.Apply(skeletonAnimation.Skeleton); 
+            skeletonAnimation.LateUpdate();
         }
         
         public void ChangeHp(float value)
@@ -79,10 +83,12 @@ namespace Game.Scripts.Mobs
         
         public virtual void Select()
         {
+            ChangeLayer("SelectedLiveObjects");
         }
         
         public virtual void Deselect()
         {
+            ChangeLayer("LiveObjects");
         }
         
         public void HideOrShow(bool shown)
@@ -90,9 +96,25 @@ namespace Game.Scripts.Mobs
             skeletonAnimation.gameObject.SetActive(shown);
         }
         
-        public void ChangeLayer(int i)
+        public void ChangeLayer(string name)
         {
-           skeletonAnimation.transform.GetComponent<MeshRenderer>().sortingOrder = i;
+            meshRenderer.sortingLayerName = name;
+        }
+
+        public void ChangeSkin(string name)
+        {
+            if(skeletonAnimation.skeleton.Skin != null)
+                skeletonAnimation.skeleton.Skin.Clear();
+            
+            var newSkin = skeletonAnimation.skeleton.Data.FindSkin(name).GetClone();
+
+            skeletonAnimation.skeleton.SetSkin(newSkin);
+            RefreshSkeletonAttachments();
+        }
+        
+        public virtual void RestoreHp(int startHp)
+        {
+            Hp = startHp;
         }
     }
 }
